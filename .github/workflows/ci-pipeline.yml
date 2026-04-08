@@ -1,1 +1,42 @@
-.
+name: Java CI with Snyk
+
+on:
+  push:
+    branches:
+      - main
+  #pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # 1️⃣ Checkout Repository
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    # 2️⃣ Setup Java
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # 3️⃣ Build Java Application
+    - name: Build with Maven
+      run: mvn clean package
+
+    # 4️⃣ Install Snyk CLI
+    - name: Install Snyk
+      run: npm install -g snyk
+
+    # 5️⃣ Snyk Security Scan
+    - name: Snyk Open Source Scan
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: snyk test
+
+    # 6️⃣ Build Docker Image
+    - name: Build Docker Image
+      run: docker build -t java-poc:1.0 .
